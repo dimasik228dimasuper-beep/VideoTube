@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoTube Pro</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f9f9f9; color: #030303; }
+        header { position: fixed; top: 0; left: 0; width: 100%; height: 56px; background: #fff; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; border-bottom: 1px solid #e5e5e5; z-index: 100; }
+        .logo { font-size: 20px; font-weight: bold; color: red; text-decoration: none; cursor: pointer; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .btn-upload-trigger { background: #ff0000; color: #fff; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+        .app-container { display: flex; margin-top: 56px; }
+        aside { width: 240px; background: #fff; padding: 12px; height: calc(100vh - 56px); position: fixed; border-right: 1px solid #e5e5e5; }
+        .sidebar-menu { list-style: none; }
+        .sidebar-menu li { padding: 12px; cursor: pointer; border-radius: 8px; font-size: 14px; }
+        .sidebar-menu li:hover, .sidebar-menu li.active { background: #f2f2f2; font-weight: bold; }
+        .page { display: none; width: 100%; margin-left: 240px; padding: 24px; }
+        .page.active { display: block; }
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .video-card { cursor: pointer; display: flex; flex-direction: column; gap: 8px; background: #fff; padding: 10px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .thumbnail { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 8px; overflow: hidden; }
+        .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+        .video-title { font-size: 14px; font-weight: 600; line-height: 18px; margin-top: 4px; }
+        .video-author { font-size: 12px; color: #606060; }
+        .watch-layout { display: flex; gap: 24px; max-width: 1200px; margin: 0 auto; }
+        .player-side { flex: 2; }
+        .player-box { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; }
+        .player-box iframe { width: 100%; height: 100%; border: none; }
+        .video-meta-panel { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-bottom: 14px; border-bottom: 1px solid #e5e5e5; }
+        .author-zone { display: flex; align-items: center; gap: 12px; }
+        .btn-sub { background: #0f0f0f; color: #fff; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+        .btn-sub.active { background: #e5e5e5; color: #030303; }
+        .btn-like { background: #f2f2f2; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+        .btn-like.active { background: #cce6ff; color: #0066cc; }
+        .form-box { max-width: 500px; background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0 auto; }
+        .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+        .form-group input { padding: 10px; border: 1px solid #ccc; border-radius: 6px; outline: none; }
+        .btn-submit { background: #ff0000; color: #fff; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .sidebar-side { flex: 1; display: flex; flex-direction: column; gap: 16px; min-width: 280px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo" onclick="switchPage('home')">🎥 VideoTube</div>
+        <div class="header-right">
+            <button class="btn-upload-trigger" onclick="switchPage('upload')">+ Видео</button>
+            <div style="width:32px; height:32px; background:#0066cc; border-radius:50%;"></div>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <aside>
+            <ul class="sidebar-menu">
+                <li id="m-home" class="active" onclick="switchPage('home')">🏠 Главная</li>
+                <li id="m-upload" onclick="switchPage('upload')">📤 Выложить</li>
+            </ul>
+        </aside>
+
+        <!-- 1. ГЛАВНАЯ СТРАНИЦА -->
+        <div id="page-home" class="page active">
+            <div class="video-grid" id="mainGrid">
+                <!-- Сюда программно добавляются видео -->
+            </div>
+        </div>
+
+        <!-- 2. СТРАНИЦА ПЛЕЕРА -->
+        <div id="page-watch" class="page">
+            <div class="watch-layout">
+                <div class="player-side">
+                    <div class="player-box">
+                        <iframe id="mainIframe" src="" allowfullscreen></iframe>
+                    </div>
+                    <h1 id="playerTitle" style="margin-top:12px; font-size:22px;">Название</h1>
+                    <div class="video-meta-panel">
+                        <div class="author-zone">
+                            <div style="width:40px; height:40px; background:#ccc; border-radius:50%;"></div>
+                            <div>
+                                <div id="playerAuthor" style="font-weight:bold;">Автор</div>
+                                <div style="font-size:12px; color:#606060;">120 тыс. подписчиков</div>
+                            </div>
+                            <button class="btn-sub" id="subBtn" onclick="toggleSub()">Подписаться</button>
+                        </div>
+                        <button class="btn-like" id="likeBtn" onclick="toggleLike()">👍 <span id="likeCount">450</span></button>
+                    </div>
+                </div>
+                <div class="sidebar-side">
+                    <h3 style="font-size:14px; color:#606060;">Рекомендации отсутствуют</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. СТРАНИЦА ЗАГРУЗКИ ВИДЕО -->
+        <div id="page-upload" class="page">
+            <div class="form-box">
+                <h2 style="margin-bottom:20px; text-align:center;">Выложить новое видео</h2>
+                <div class="form-group">
+                    <label>Название видео</label>
+                    <input type="text" id="formTitle" placeholder="Например: Мой первый влог">
+                </div>
+                <div class="form-group">
+                    <label>Имя автора / Канала</label>
+                    <input type="text" id="formAuthor" placeholder="Например: Иван Программист">
+                </div>
+                <div class="form-group">
+                    <label>Ссылка на картинку-превью (URL)</label>
+                    <input type="text" id="formImg" placeholder="https://picsum.photos">
+                </div>
+                <div class="form-group">
+                    <label>Ссылка на видео (YouTube Embed URL)</label>
+                    <input type="text" id="formVideo" placeholder="https://youtube.com">
+                </div>
+                <button class="btn-submit" onclick="publishVideo()">Опубликовать ролик</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Начальная база видеороликов
+        let videos = [
+            { title: "Как войти в IT в 2026 году? Пошаговая карта", author: "Веб Академия", img: "https://picsum.photos", video: "https://youtube.com" },
+            { title: "Потрясающая природа Исландии в 4K качестве", author: "National Geo", img: "https://picsum.photos", video: "https://youtube.com" }
+        ];
+
+        let isSubbed = false, isLiked = false;
+
+        function renderVideos() {
+            const grid = document.getElementById('mainGrid');
+            grid.innerHTML = '';
+            videos.forEach((v, index) => {
+                grid.innerHTML += `
+                    <div class="video-card" onclick="openVideo(${index})">
+                        <div class="thumbnail"><img src="${v.img}"></div>
+                        <div class="video-title">${v.title}</div>
+                        <div class="video-author">${v.author}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function switchPage(name) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar-menu li').forEach(l => l.classList.remove('active'));
+            
+            document.getElementById('page-' + name).classList.add('active');
+            if(document.getElementById('m-' + name)) {
+                document.getElementById('m-' + name).classList.add('active');
+            }
+            if(name !== 'watch') document.getElementById('mainIframe').src = "";
+            window.scrollTo(0,0);
+        }
+
+        function openVideo(index) {
+            const v = videos[index];
+            document.getElementById('playerTitle').innerText = v.title;
+            document.getElementById('playerAuthor').innerText = v.author;
+            document.getElementById('mainIframe').src = v.video;
+            
+            isSubbed = false; isLiked = false;
+            document.getElementById('subBtn').innerText = 'Подписаться';
+            document.getElementById('subBtn').classList.remove('active');
+            document.getElementById('likeBtn').classList.remove('active');
+            document.getElementById('likeCount').innerText = '450';
+            
+            switchPage('watch');
+        }
+
+        function publishVideo() {
+            const t = document.getElementById('formTitle').value;
+            const a = document.getElementById('formAuthor').value;
+            const i = document.getElementById('formImg').value || "https://picsum.photos";
